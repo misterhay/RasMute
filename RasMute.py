@@ -31,7 +31,7 @@ x32address = ('192.168.1.200', 10023)
 client = OSCClient()
 client.connect((x32address))
 # not sure about these next three lines, check the syntax
-#server = OSCServer(('localhost', 10023))
+#server = ThreadingOSCServer((x32address, 10023))
 #server.timeout = 0
 #run = True
 
@@ -43,12 +43,14 @@ client.connect((x32address))
 # declare some varaibles for storing the current states of the mute groups
 muteGroup1 = 0
 muteGroup2 = 0
-muteGroup3 = [0, 1]
+muteGroup3 = 0
 muteGroup4 = [0, 1]
 muteGroup5 = [0, 1]
 muteGroup6 = [0, 1]
 
 # add the message handlers for the channels we're controlling
+#server.addDefaultHandlers()
+#server.addMsgHandler('/config/mute', muteGroupHandler)
 #server.addMsgHandler(pulpit, muteHandler1)
 #server.addMsgHandler(lapel, muteHandler2)
 
@@ -68,19 +70,30 @@ button1State = 1
 # also change the value of the corresponding LED
 # in an infinte loop
 while True:
- if button1State == 1:
-  #toggle the muteGroup1 variable between 0 and 1, %2 is right out
+ #button1State = GPIO.input(button1)
+ if ((not previousInput1) and input1):
+  # toggle the muteGroup1 variable between 0 and 1, %2 is right out
   muteGroup1 = (muteGroup1 + 1) %2
-  print muteGroup1
-  #toggleMuteGroup(1, muteGroup1)
+  toggleMuteGroup(1, muteGroup1)
+  previousInput1 = input1
  elif button2State == 1:
-  muteGroup2 = not muteGroup2
-  toggleMuteGroup(2, 0)
+  muteGroup1 = (muteGroup2 + 1) %2
+  toggleMuteGroup(2, muteGroup2)
  # wait for a second before doing it again
  sleep(1)
 
-toggleMuteGroup(1, 0)
+def muteGroupHandler(addr, tags, stuff, source):
+ if addr == '/config/mute/':
+  print addr
+  print tags
+  print stuff
+  print source
 
+def main():
+    st = threading.Thread(target = server.serve_forever)
+    st.start()
+
+main()
 
 '''
 #  check out this example of a threading OSC server https://code.google.com/p/osc-midi-bridge/wiki/OSC
@@ -106,8 +119,6 @@ client.send(msg)
 '''
 
 # shut everything down
-#server.close()
 #threadingServer.join()
+#server.close()
 #GPIO.cleanup()
-#except KeyboardInterrupt:
-# GPIO.cleanup()
