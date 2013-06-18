@@ -38,7 +38,15 @@ client.connect((x32address))
 # define the OSC addresses for the channels that we'll be controlling
 #pulpit = '/ch/01/mix/on'
 #lapel = '/ch/02/mix/on'
-#mutegroup1 = '/config/mute/1'
+#mutegroup = '/config/mute/1'
+
+# declare some varaibles for storing the current states of the mute groups
+muteGroup1 = 0
+muteGroup2 = 0
+muteGroup3 = [0, 1]
+muteGroup4 = [0, 1]
+muteGroup5 = [0, 1]
+muteGroup6 = [0, 1]
 
 # add the message handlers for the channels we're controlling
 #server.addMsgHandler(pulpit, muteHandler1)
@@ -54,10 +62,20 @@ def toggleMuteGroup(channel, state):
  client.send(msg)
  print msg
 
+button1State = 1
+
 # check the state of the mute group, and set the value of the mute group accordingly
 # also change the value of the corresponding LED
 # in an infinte loop
 while True:
+ if button1State == 1:
+  #toggle the muteGroup1 variable between 0 and 1, %2 is right out
+  muteGroup1 = (muteGroup1 + 1) %2
+  print muteGroup1
+  #toggleMuteGroup(1, muteGroup1)
+ elif button2State == 1:
+  muteGroup2 = not muteGroup2
+  toggleMuteGroup(2, 0)
  # wait for a second before doing it again
  sleep(1)
 
